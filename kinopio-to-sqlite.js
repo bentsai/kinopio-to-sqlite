@@ -57,9 +57,8 @@ const insertSpaces = async () => {
       }
     );
     if (response.statusCode == 200) {
-      for (var i = 0; i < response.body.length; i++) {
-        var space = response.body[i];
-        insertSpace(space.id);
+      for (const space of response.body) {
+        await insertSpace(space.id);
       }
     }
   } catch (error) {
@@ -68,11 +67,34 @@ const insertSpaces = async () => {
 };
 
 const postProcess = () => {
-  sqliteUtils(["enable-fts", "kinopio.db", "cards", "name"]);
-  sqliteUtils(["enable-fts", "kinopio.db", "spaces", "name"]);
-  sqliteUtils(["enable-fts", "kinopio.db", "connections", "name"]);
-  sqliteUtils(["enable-fts", "kinopio.db", "connectionTypes", "name"]);
-  sqliteUtils(["enable-fts", "kinopio.db", "tags", "name"]);
+  sqliteUtils([
+    "enable-fts",
+    "kinopio.db",
+    "cards",
+    "name",
+    "--create-triggers",
+  ]);
+  sqliteUtils([
+    "enable-fts",
+    "kinopio.db",
+    "spaces",
+    "name",
+    "--create-triggers",
+  ]);
+  sqliteUtils([
+    "enable-fts",
+    "kinopio.db",
+    "connectionTypes",
+    "name",
+    "--create-triggers",
+  ]);
+  sqliteUtils([
+    "enable-fts",
+    "kinopio.db",
+    "tags",
+    "name",
+    "--create-triggers",
+  ]);
   sqliteUtils([
     "add-foreign-keys",
     "kinopio.db",
@@ -84,21 +106,10 @@ const postProcess = () => {
 };
 
 const sqliteUtils = (args, options) => {
-  console.log("sqliteUtils", args);
   const { error } = spawnSync("sqlite-utils", args, options);
   if (error) console.error({ error });
 };
 
-await insertSpaces();
-
-console.log("running now...");
-postProcess();
-
-/*
 insertSpaces()
-  .then(() => {
-    console.log("running now...");
-    postProcess();
-  })
-  .catch((e) => console.log(e));
-  */
+  .then(() => postProcess())
+  .catch((e) => console.error(e));
