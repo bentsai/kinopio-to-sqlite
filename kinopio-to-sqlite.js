@@ -26,41 +26,21 @@ const insertSpace = async (id) => {
         ...space
       } = response.body;
       console.log(space.name);
-      spawnSync(
-        "sqlite-utils",
-        ["insert", "kinopio.db", "spaces", "-", "--pk=id"],
-        {
-          input: JSON.stringify(space),
-        }
-      );
-      spawnSync(
-        "sqlite-utils",
-        ["insert", "kinopio.db", "cards", "-", "--pk=id"],
-        {
-          input: JSON.stringify(cards),
-        }
-      );
-      spawnSync(
-        "sqlite-utils",
-        ["insert", "kinopio.db", "connections", "-", "--pk=id"],
-        {
-          input: JSON.stringify(connections),
-        }
-      );
-      spawnSync(
-        "sqlite-utils",
-        ["insert", "kinopio.db", "connectionTypes", "-", "--pk=id"],
-        {
-          input: JSON.stringify(connectionTypes),
-        }
-      );
-      spawnSync(
-        "sqlite-utils",
-        ["insert", "kinopio.db", "tags", "-", "--pk=id"],
-        {
-          input: JSON.stringify(tags),
-        }
-      );
+      sqliteUtils(["insert", "kinopio.db", "spaces", "-", "--pk=id"], {
+        input: JSON.stringify(space),
+      });
+      sqliteUtils(["insert", "kinopio.db", "cards", "-", "--pk=id"], {
+        input: JSON.stringify(cards),
+      });
+      sqliteUtils(["insert", "kinopio.db", "connections", "-", "--pk=id"], {
+        input: JSON.stringify(connections),
+      });
+      sqliteUtils(["insert", "kinopio.db", "connectionTypes", "-", "--pk=id"], {
+        input: JSON.stringify(connectionTypes),
+      });
+      sqliteUtils(["insert", "kinopio.db", "tags", "-", "--pk=id"], {
+        input: JSON.stringify(tags),
+      });
     }
   } catch (error) {
     console.log(error);
@@ -88,22 +68,12 @@ const insertSpaces = async () => {
 };
 
 const postProcess = () => {
-  spawnSync("sqlite-utils", ["enable-fts", "kinopio.db", "cards", "name"]);
-  spawnSync("sqlite-utils", ["enable-fts", "kinopio.db", "spaces", "name"]);
-  spawnSync("sqlite-utils", [
-    "enable-fts",
-    "kinopio.db",
-    "connections",
-    "name",
-  ]);
-  spawnSync("sqlite-utils", [
-    "enable-fts",
-    "kinopio.db",
-    "connectionTypes",
-    "name",
-  ]);
-  spawnSync("sqlite-utils", ["enable-fts", "kinopio.db", "tags", "name"]);
-  spawnSync("sqlite-utils", [
+  sqliteUtils(["enable-fts", "kinopio.db", "cards", "name"]);
+  sqliteUtils(["enable-fts", "kinopio.db", "spaces", "name"]);
+  sqliteUtils(["enable-fts", "kinopio.db", "connections", "name"]);
+  sqliteUtils(["enable-fts", "kinopio.db", "connectionTypes", "name"]);
+  sqliteUtils(["enable-fts", "kinopio.db", "tags", "name"]);
+  sqliteUtils([
     "add-foreign-keys",
     "kinopio.db",
     "cards",
@@ -113,6 +83,22 @@ const postProcess = () => {
   ]);
 };
 
+const sqliteUtils = (args, options) => {
+  console.log("sqliteUtils", args);
+  const { error } = spawnSync("sqlite-utils", args, options);
+  if (error) console.error({ error });
+};
+
+await insertSpaces();
+
+console.log("running now...");
+postProcess();
+
+/*
 insertSpaces()
-  .then(postProcess())
+  .then(() => {
+    console.log("running now...");
+    postProcess();
+  })
   .catch((e) => console.log(e));
+  */
