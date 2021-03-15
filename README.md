@@ -13,3 +13,6 @@ Create `config.json` with your Kinopio `apiKey`:
 ```
 
 Run the script.
+
+---
+https://metalcoder.dev/make-array-foreach-synchronous-even-with-an-asynchronous-body/

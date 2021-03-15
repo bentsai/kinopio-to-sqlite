@@ -3,6 +3,7 @@
 const fs = require("fs");
 const needle = require("needle");
 const { spawnSync } = require("child_process");
+let sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const { apiKey } = JSON.parse(fs.readFileSync("config.json", "utf8"));
 
@@ -21,6 +22,8 @@ const insertSpace = (id) => {
           collaborators,
           ...space
         } = response.body;
+        console.log(space.id);
+        console.log(space.name);
         spawnSync(
           "sqlite-utils",
           ["insert", "kinopio.db", "spaces", "-", "--pk=id"],
@@ -35,6 +38,9 @@ const insertSpace = (id) => {
             input: JSON.stringify(cards),
           }
         );
+      } else {
+        console.log(response && response.statusCode);
+        console.log({ error });
       }
     }
   );
@@ -45,8 +51,14 @@ needle.get(
   { headers: { Authorization: apiKey } },
   function (error, response) {
     if (!error && response.statusCode == 200) {
-      response.body.forEach((space) => insertSpace(space.id));
+      for (var i = 0; i < response.body.length; i++) {
+        var space = response.body[i];
+        insertSpace(space.id);
+      }
       postProcess();
+    } else {
+      console.log(response && response.statusCode);
+      console.log({ error });
     }
   }
 );
