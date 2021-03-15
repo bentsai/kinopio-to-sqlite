@@ -1,7 +1,7 @@
 {
-  "name": "k2md",
+  "name": "kinopio-to-sqlite",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "kinopio-to-sqlite.js",
   "license": "MIT",
   "dependencies": {
     "needle": "^2.6.0"
