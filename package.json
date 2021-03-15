@@ -1,0 +1,9 @@
+{
+  "name": "k2md",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "needle": "^2.6.0"
+  }
+}
