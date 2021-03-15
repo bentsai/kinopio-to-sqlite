@@ -8,9 +8,13 @@ const { apiKey } = JSON.parse(fs.readFileSync("config.json", "utf8"));
 
 const insertSpace = async (id) => {
   try {
-    const response = await needle("get", `http://api.kinopio.club/space/${id}`, {
-      headers: { Authorization: apiKey },
-    });
+    const response = await needle(
+      "get",
+      `http://api.kinopio.club/space/${id}`,
+      {
+        headers: { Authorization: apiKey },
+      }
+    );
     if (response.statusCode == 200) {
       const {
         cards,
@@ -63,28 +67,41 @@ const insertSpace = async (id) => {
   }
 };
 
-needle.get(
-  "http://api.kinopio.club/user/spaces",
-  { headers: { Authorization: apiKey } },
-  function (error, response) {
-    if (!error && response.statusCode == 200) {
+const insertSpaces = async () => {
+  try {
+    const response = await needle(
+      "get",
+      "http://api.kinopio.club/user/spaces",
+      {
+        headers: { Authorization: apiKey },
+      }
+    );
+    if (response.statusCode == 200) {
       for (var i = 0; i < response.body.length; i++) {
         var space = response.body[i];
         insertSpace(space.id);
       }
-      postProcess();
-    } else {
-      console.log(response && response.statusCode);
-      console.log({ error });
     }
+  } catch (error) {
+    console.log(error);
   }
-);
+};
 
 const postProcess = () => {
   spawnSync("sqlite-utils", ["enable-fts", "kinopio.db", "cards", "name"]);
   spawnSync("sqlite-utils", ["enable-fts", "kinopio.db", "spaces", "name"]);
-  spawnSync("sqlite-utils", ["enable-fts", "kinopio.db", "connections", "name"]);
-  spawnSync("sqlite-utils", ["enable-fts", "kinopio.db", "connectionTypes", "name"]);
+  spawnSync("sqlite-utils", [
+    "enable-fts",
+    "kinopio.db",
+    "connections",
+    "name",
+  ]);
+  spawnSync("sqlite-utils", [
+    "enable-fts",
+    "kinopio.db",
+    "connectionTypes",
+    "name",
+  ]);
   spawnSync("sqlite-utils", ["enable-fts", "kinopio.db", "tags", "name"]);
   spawnSync("sqlite-utils", [
     "add-foreign-keys",
@@ -95,3 +112,7 @@ const postProcess = () => {
     "id",
   ]);
 };
+
+insertSpaces()
+  .then(postProcess())
+  .catch((e) => console.log(e));
