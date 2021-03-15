@@ -3,47 +3,43 @@
 const fs = require("fs");
 const needle = require("needle");
 const { spawnSync } = require("child_process");
-let sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const { apiKey } = JSON.parse(fs.readFileSync("config.json", "utf8"));
 
-const insertSpace = (id) => {
-  needle.get(
-    `http://api.kinopio.club/space/${id}`,
-    { headers: { Authorization: apiKey } },
-    function (error, response) {
-      if (!error && response.statusCode == 200) {
-        const {
-          cards,
-          connections,
-          connectionTypes,
-          tags,
-          users,
-          collaborators,
-          ...space
-        } = response.body;
-        console.log(space.id);
-        console.log(space.name);
-        spawnSync(
-          "sqlite-utils",
-          ["insert", "kinopio.db", "spaces", "-", "--pk=id"],
-          {
-            input: JSON.stringify(space),
-          }
-        );
-        spawnSync(
-          "sqlite-utils",
-          ["insert", "kinopio.db", "cards", "-", "--pk=id"],
-          {
-            input: JSON.stringify(cards),
-          }
-        );
-      } else {
-        console.log(response && response.statusCode);
-        console.log({ error });
-      }
+const insertSpace = async (id) => {
+  try {
+    const response = await needle("get", `http://api.kinopio.club/space/${id}`, {
+      headers: { Authorization: apiKey },
+    });
+    if (response.statusCode == 200) {
+      const {
+        cards,
+        connections,
+        connectionTypes,
+        tags,
+        users,
+        collaborators,
+        ...space
+      } = response.body;
+      console.log(space.name);
+      spawnSync(
+        "sqlite-utils",
+        ["insert", "kinopio.db", "spaces", "-", "--pk=id"],
+        {
+          input: JSON.stringify(space),
+        }
+      );
+      spawnSync(
+        "sqlite-utils",
+        ["insert", "kinopio.db", "cards", "-", "--pk=id"],
+        {
+          input: JSON.stringify(cards),
+        }
+      );
     }
-  );
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 needle.get(
