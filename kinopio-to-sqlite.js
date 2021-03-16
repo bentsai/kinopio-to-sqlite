@@ -4,7 +4,7 @@ const fs = require("fs");
 const needle = require("needle");
 const { spawnSync } = require("child_process");
 
-const { apiKey } = JSON.parse(fs.readFileSync("config.json", "utf8"));
+const { apiKey, lastRun } = JSON.parse(fs.readFileSync("config.json", "utf8"));
 
 const insertSpace = async (id) => {
   try {
@@ -58,7 +58,9 @@ const insertSpaces = async () => {
     );
     if (response.statusCode == 200) {
       for (const space of response.body) {
-        await insertSpace(space.id);
+        if (lastRun == null || new Date(lastRun) < new Date(space.updatedAt)) {
+          await insertSpace(space.id);
+        }
       }
     }
   } catch (error) {
@@ -111,5 +113,11 @@ const sqliteUtils = (args, options) => {
 };
 
 insertSpaces()
-  .then(() => postProcess())
+  .then(() => {
+    postProcess();
+    fs.writeFileSync(
+      "config.json",
+      JSON.stringify({ apiKey: apiKey, lastRun: new Date() }, "utf8")
+    );
+  })
   .catch((e) => console.error(e));
