@@ -105,6 +105,46 @@ const postProcess = () => {
     "spaces",
     "id",
   ]);
+  sqliteUtils([
+    "add-foreign-keys",
+    "kinopio.db",
+    "tags",
+    "spaceId",
+    "spaces",
+    "id",
+  ]);
+  sqliteUtils([
+    "add-foreign-keys",
+    "kinopio.db",
+    "connections",
+    "spaceId",
+    "spaces",
+    "id",
+  ]);
+  sqliteUtils([
+    "add-foreign-keys",
+    "kinopio.db",
+    "connectionTypes",
+    "spaceId",
+    "spaces",
+    "id",
+  ]);
+  sqliteUtils([
+    "add-foreign-keys",
+    "kinopio.db",
+    "connections",
+    "startCardId",
+    "cards",
+    "id",
+  ]);
+  sqliteUtils([
+    "add-foreign-keys",
+    "kinopio.db",
+    "connections",
+    "endCardId",
+    "cards",
+    "id",
+  ]);
 };
 
 const sqliteUtils = (args, options) => {
