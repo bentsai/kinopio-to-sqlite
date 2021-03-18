@@ -6,6 +6,7 @@ Pulls all data from [Kinopio](kinopio.club) and inserts into a SQLite database f
 
 **Prerequisites**
 
+- node
 - datasette
 - sqlite-utils
 
