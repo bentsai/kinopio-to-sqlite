@@ -26,21 +26,43 @@ const insertSpace = async (id) => {
         ...space
       } = response.body;
       console.log(space.name);
-      sqliteUtils(["insert", "kinopio.db", "spaces", "-", "--pk=id"], {
-        input: JSON.stringify(space),
-      });
-      sqliteUtils(["insert", "kinopio.db", "cards", "-", "--pk=id"], {
-        input: JSON.stringify(cards),
-      });
-      sqliteUtils(["insert", "kinopio.db", "connections", "-", "--pk=id"], {
-        input: JSON.stringify(connections),
-      });
-      sqliteUtils(["insert", "kinopio.db", "connectionTypes", "-", "--pk=id"], {
-        input: JSON.stringify(connectionTypes),
-      });
-      sqliteUtils(["insert", "kinopio.db", "tags", "-", "--pk=id"], {
-        input: JSON.stringify(tags),
-      });
+      sqliteUtils(
+        ["insert", "kinopio.db", "spaces", "-", "--pk=id", "--replace"],
+        {
+          input: JSON.stringify(space),
+        }
+      );
+      sqliteUtils(
+        ["insert", "kinopio.db", "cards", "-", "--pk=id", "--replace"],
+        {
+          input: JSON.stringify(cards),
+        }
+      );
+      sqliteUtils(
+        ["insert", "kinopio.db", "connections", "-", "--pk=id", "--replace"],
+        {
+          input: JSON.stringify(connections),
+        }
+      );
+      sqliteUtils(
+        [
+          "insert",
+          "kinopio.db",
+          "connectionTypes",
+          "-",
+          "--pk=id",
+          "--replace",
+        ],
+        {
+          input: JSON.stringify(connectionTypes),
+        }
+      );
+      sqliteUtils(
+        ["insert", "kinopio.db", "tags", "-", "--pk=id", "--replace"],
+        {
+          input: JSON.stringify(tags),
+        }
+      );
     }
   } catch (error) {
     console.log(error);
@@ -104,42 +126,22 @@ const postProcess = () => {
     "spaceId",
     "spaces",
     "id",
-  ]);
-  sqliteUtils([
-    "add-foreign-keys",
-    "kinopio.db",
     "tags",
     "spaceId",
     "spaces",
     "id",
-  ]);
-  sqliteUtils([
-    "add-foreign-keys",
-    "kinopio.db",
     "connections",
     "spaceId",
     "spaces",
     "id",
-  ]);
-  sqliteUtils([
-    "add-foreign-keys",
-    "kinopio.db",
     "connectionTypes",
     "spaceId",
     "spaces",
     "id",
-  ]);
-  sqliteUtils([
-    "add-foreign-keys",
-    "kinopio.db",
     "connections",
     "startCardId",
     "cards",
     "id",
-  ]);
-  sqliteUtils([
-    "add-foreign-keys",
-    "kinopio.db",
     "connections",
     "endCardId",
     "cards",
