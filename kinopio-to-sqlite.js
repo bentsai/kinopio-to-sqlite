@@ -4,6 +4,16 @@ const fs = require("fs");
 const needle = require("needle");
 const { spawnSync } = require("child_process");
 
+const args = process.argv.slice(2);
+if (args.length === 0) {
+  console.log(
+    "Usage:",
+    process.argv[1].split("/").slice(-1) + " <database name>"
+  );
+  process.exit();
+}
+
+const db = args[0];
 const { apiKey, lastRun } = JSON.parse(fs.readFileSync("config.json", "utf8"));
 
 const insertSpace = async (id) => {
@@ -25,44 +35,29 @@ const insertSpace = async (id) => {
         collaborators,
         ...space
       } = response.body;
-      console.log(space.name);
+      process.stdout.write(space.name + ": spaces");
+      sqliteUtils(["insert", db, "spaces", "-", "--pk=id", "--replace"], {
+        input: JSON.stringify(space),
+      });
+      process.stdout.write(", cards");
+      sqliteUtils(["insert", db, "cards", "-", "--pk=id", "--replace"], {
+        input: JSON.stringify(cards),
+      });
+      process.stdout.write(", connections");
+      sqliteUtils(["insert", db, "connections", "-", "--pk=id", "--replace"], {
+        input: JSON.stringify(connections),
+      });
+      process.stdout.write(", connectionTypes");
       sqliteUtils(
-        ["insert", "kinopio.db", "spaces", "-", "--pk=id", "--replace"],
-        {
-          input: JSON.stringify(space),
-        }
-      );
-      sqliteUtils(
-        ["insert", "kinopio.db", "cards", "-", "--pk=id", "--replace"],
-        {
-          input: JSON.stringify(cards),
-        }
-      );
-      sqliteUtils(
-        ["insert", "kinopio.db", "connections", "-", "--pk=id", "--replace"],
-        {
-          input: JSON.stringify(connections),
-        }
-      );
-      sqliteUtils(
-        [
-          "insert",
-          "kinopio.db",
-          "connectionTypes",
-          "-",
-          "--pk=id",
-          "--replace",
-        ],
+        ["insert", db, "connectionTypes", "-", "--pk=id", "--replace"],
         {
           input: JSON.stringify(connectionTypes),
         }
       );
-      sqliteUtils(
-        ["insert", "kinopio.db", "tags", "-", "--pk=id", "--replace"],
-        {
-          input: JSON.stringify(tags),
-        }
-      );
+      process.stdout.write(", tags\n");
+      sqliteUtils(["insert", db, "tags", "-", "--pk=id", "--replace"], {
+        input: JSON.stringify(tags),
+      });
     }
   } catch (error) {
     console.log(error);
@@ -91,37 +86,19 @@ const insertSpaces = async () => {
 };
 
 const postProcess = () => {
+  sqliteUtils(["enable-fts", db, "cards", "name", "--create-triggers"]);
+  sqliteUtils(["enable-fts", db, "spaces", "name", "--create-triggers"]);
   sqliteUtils([
     "enable-fts",
-    "kinopio.db",
-    "cards",
-    "name",
-    "--create-triggers",
-  ]);
-  sqliteUtils([
-    "enable-fts",
-    "kinopio.db",
-    "spaces",
-    "name",
-    "--create-triggers",
-  ]);
-  sqliteUtils([
-    "enable-fts",
-    "kinopio.db",
+    db,
     "connectionTypes",
     "name",
     "--create-triggers",
   ]);
-  sqliteUtils([
-    "enable-fts",
-    "kinopio.db",
-    "tags",
-    "name",
-    "--create-triggers",
-  ]);
+  sqliteUtils(["enable-fts", db, "tags", "name", "--create-triggers"]);
   sqliteUtils([
     "add-foreign-keys",
-    "kinopio.db",
+    db,
     "spaces",
     "originSpaceId",
     "spaces",
