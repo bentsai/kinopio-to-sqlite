@@ -35,29 +35,16 @@ const insertSpace = async (id) => {
         collaborators,
         ...space
       } = response.body;
-      process.stdout.write(space.name + ": spaces");
-      sqliteUtils(["insert", db, "spaces", "-", "--pk=id", "--replace"], {
-        input: JSON.stringify(space),
-      });
+      process.stdout.write(space.name + ": space");
+      sqliteUtilsInsertTable("spaces", space);
       process.stdout.write(", cards");
-      sqliteUtils(["insert", db, "cards", "-", "--pk=id", "--replace"], {
-        input: JSON.stringify(cards),
-      });
+      sqliteUtilsInsertTable("cards", cards);
       process.stdout.write(", connections");
-      sqliteUtils(["insert", db, "connections", "-", "--pk=id", "--replace"], {
-        input: JSON.stringify(connections),
-      });
+      sqliteUtilsInsertTable("connections", connections);
       process.stdout.write(", connectionTypes");
-      sqliteUtils(
-        ["insert", db, "connectionTypes", "-", "--pk=id", "--replace"],
-        {
-          input: JSON.stringify(connectionTypes),
-        }
-      );
+      sqliteUtilsInsertTable("connectionTypes", connectionTypes);
       process.stdout.write(", tags\n");
-      sqliteUtils(["insert", db, "tags", "-", "--pk=id", "--replace"], {
-        input: JSON.stringify(tags),
-      });
+      sqliteUtilsInsertTable("tags", tags);
     }
   } catch (error) {
     console.log(error);
@@ -137,6 +124,13 @@ const postProcess = () => {
 const sqliteUtils = (args, options) => {
   const { error } = spawnSync("sqlite-utils", args, options);
   if (error) console.error({ error });
+};
+
+const sqliteUtilsInsertTable = (table, data) => {
+  sqliteUtils(["insert", db, table, "-", "--pk=id", "--replace"], {
+    input: JSON.stringify(data),
+    timeout: 4000,
+  });
 };
 
 insertSpaces()
