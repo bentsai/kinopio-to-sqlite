@@ -35,3 +35,11 @@ This creates (or updates) `kinopio.db`. Now you can explore with Datasette:
 ```
 
 ---
+
+## Notes
+
+### Publish to Vercel
+
+```bash
+datasette publish vercel public.db --project=kinopio-public --plugins-dir=plugins/
+```
