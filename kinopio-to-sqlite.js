@@ -36,8 +36,12 @@ const insertSpace = async (id) => {
         ...space
       } = response.body;
       process.stdout.write(space.name + ": space");
+      delete space.isRemoved;
       sqliteUtilsInsertTable("spaces", space);
       process.stdout.write(", cards");
+      cards.forEach((c) => {
+        delete c.isRemoved;
+      });
       sqliteUtilsInsertTable("cards", cards);
       process.stdout.write(", connections");
       sqliteUtilsInsertTable("connections", connections);
@@ -101,6 +105,10 @@ const postProcess = () => {
     "tags",
     "spaceId",
     "spaces",
+    "id",
+    "tags",
+    "cardId",
+    "cards",
     "id",
     "connections",
     "spaceId",
