@@ -144,7 +144,9 @@ const sqliteUtilsInsertTable = (table, data) => {
 
 insertSpaces()
   .then(() => {
-    postProcess();
+    if (!fs.existsSync(db)) {
+      postProcess(); // Only need to run this for new dbs
+    }
     fs.writeFileSync(
       "config.json",
       JSON.stringify({ apiKey: apiKey, lastRun: new Date() }, "utf8")
