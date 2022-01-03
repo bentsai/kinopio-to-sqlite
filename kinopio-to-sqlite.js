@@ -130,12 +130,13 @@ const postProcess = () => {
 };
 
 const sqliteUtils = (args, options) => {
-  const { error } = spawnSync("sqlite-utils", args, options);
+  const { error, stderr } = spawnSync("sqlite-utils", args, options);
+  if (stderr.toString().trim()) console.error(stderr.toString());
   if (error) console.error({ error });
 };
 
 const sqliteUtilsInsertTable = (table, data) => {
-  sqliteUtils(["insert", db, table, "-", "--pk=id", "--replace"], {
+  sqliteUtils(["insert", db, table, "-", "--pk=id", "--replace", "--alter"], {
     input: JSON.stringify(data),
     timeout: 4000,
   });
